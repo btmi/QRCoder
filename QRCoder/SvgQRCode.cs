@@ -247,14 +247,13 @@ namespace QRCoder
             /// <param name="iconSizePercent">Degree of percentage coverage of the QR code by the logo</param>
             /// 
 
-            public SvgLogo(string iconVectorized, int iconSizePercent = 15, bool fillLogoBackground = true, bool iconEmbedded = false, Color? iconColor = null)
+            public SvgLogo(string iconVectorized, int iconSizePercent = 15, bool fillLogoBackground = true, bool iconEmbedded = false)
             {
                 _iconSizePercent = iconSizePercent;
                 isEmbedded = iconEmbedded;
                 _logoData = isEmbedded? iconVectorized : Convert.ToBase64String(Encoding.UTF8.GetBytes(iconVectorized), Base64FormattingOptions.None);
                 _mediaType = "image/svg+xml";
                 _fillLogoBackground = fillLogoBackground;
-                Color myC = iconColor ?? Color.Black;
             }
 
             public string GetDataUri()
