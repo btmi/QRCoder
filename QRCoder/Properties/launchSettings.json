@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "QRCoder": {
+      "commandName": "Executable",
+      "executablePath": "C:\\VS\\MQR\\MQR Generator\\MQR Generator\\bin\\Debug\\MQR Generator.exe",
+      "workingDirectory": "C:\\VS\\MQR\\MQR Generator\\MQR Generator\\bin\\Debug"
+    }
+  }
+}
