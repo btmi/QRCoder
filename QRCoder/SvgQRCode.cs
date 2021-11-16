@@ -70,7 +70,7 @@ namespace QRCoder
                 for (int xi = 0; xi < drawableModulesCount; xi += 1)
                 {
                     matrix[yi, xi] = 0;
-                    if (bitArray[xi + offset] && !IsBlockedByLogo((xi + offset) * pixelsPerModule, (yi + offset) * pixelsPerModule, logoAttr, pixelsPerModule))
+                    if (bitArray[xi + offset]) // && !IsBlockedByLogo((xi + offset) * pixelsPerModule, (yi + offset) * pixelsPerModule, logoAttr, pixelsPerModule))
                     {
                         if (x0 == -1)
                         {
@@ -122,7 +122,7 @@ namespace QRCoder
 
                         // Output SVG rectangles
                         double x = xi * pixelsPerModule;
-                        if (!IsBlockedByLogo(x, y, logoAttr, pixelsPerModule))
+                        //if (!IsBlockedByLogo(x, y, logoAttr, pixelsPerModule))
                             svgFile.AppendLine($@"<rect x=""{CleanSvgVal(x)}"" y=""{CleanSvgVal(y)}"" width=""{CleanSvgVal(xL * pixelsPerModule)}"" height=""{CleanSvgVal(yL * pixelsPerModule)}"" fill=""{darkColorHex}"" />");
 
                     }
@@ -134,6 +134,8 @@ namespace QRCoder
             {
                 if (logo.isEmbedded)
                 {
+                    if (logo.InvertImage()) svgFile.AppendLine($@"<rect x=""{CleanSvgVal(logoAttr.Value.X)}"" y=""{CleanSvgVal(logoAttr.Value.Y)}"" width=""{CleanSvgVal(logoAttr.Value.Width)}"" height=""{CleanSvgVal(logoAttr.Value.Height)}"" fill=""{darkColorHex}"" />");
+                    else svgFile.AppendLine($@"<rect x=""{CleanSvgVal(logoAttr.Value.X)}"" y=""{CleanSvgVal(logoAttr.Value.Y)}"" width=""{CleanSvgVal(logoAttr.Value.Width)}"" height=""{CleanSvgVal(logoAttr.Value.Height)}"" fill=""{lightColorHex}"" />");
                     //transform values
                     XDocument svg = XDocument.Parse(logo.GetDataUri());
                     svg.Root.SetAttributeValue("x",CleanSvgVal(logoAttr.Value.X));
@@ -141,6 +143,8 @@ namespace QRCoder
                     svg.Root.SetAttributeValue("width", CleanSvgVal(logoAttr.Value.Width));
                     svg.Root.SetAttributeValue("height", CleanSvgVal(logoAttr.Value.Height));
                     svg.Root.SetAttributeValue("shape-rendering", "geometricPrecision");
+                    if (logo.InvertImage()) svg.Root.SetAttributeValue("fill", lightColorHex);
+                    else svg.Root.SetAttributeValue("fill", darkColorHex);
                     svgFile.AppendLine(svg.ToString().Replace("svg:",""));
                 }
                 else
@@ -216,7 +220,7 @@ namespace QRCoder
             private string _logoData;
             private string _mediaType;
             private int _iconSizePercent;
-            private bool _fillLogoBackground;
+            private bool _invertIcon;
             public bool isEmbedded;
 
             /// <summary>
@@ -224,7 +228,7 @@ namespace QRCoder
             /// </summary>
             /// <param name="iconRasterized">Logo to be rendered as Bitmap/rasterized graphic</param>
             /// <param name="iconSizePercent">Degree of percentage coverage of the QR code by the logo</param>
-            public SvgLogo(Bitmap iconRasterized, int iconSizePercent = 15, bool fillLogoBackground = true)
+            public SvgLogo(Bitmap iconRasterized, int iconSizePercent = 15)
             {
                 _iconSizePercent = iconSizePercent;
                 using (var ms = new System.IO.MemoryStream())
@@ -236,7 +240,6 @@ namespace QRCoder
                     }
                 }
                 _mediaType = "image/png";
-                _fillLogoBackground = fillLogoBackground;
                 isEmbedded = false;
             }
 
@@ -247,13 +250,13 @@ namespace QRCoder
             /// <param name="iconSizePercent">Degree of percentage coverage of the QR code by the logo</param>
             /// 
 
-            public SvgLogo(string iconVectorized, int iconSizePercent = 15, bool fillLogoBackground = true, bool iconEmbedded = false)
+            public SvgLogo(string iconVectorized, int iconSizePercent = 15, bool invertIcon = false, bool iconEmbedded = false)
             {
                 _iconSizePercent = iconSizePercent;
                 isEmbedded = iconEmbedded;
                 _logoData = isEmbedded? iconVectorized : Convert.ToBase64String(Encoding.UTF8.GetBytes(iconVectorized), Base64FormattingOptions.None);
                 _mediaType = "image/svg+xml";
-                _fillLogoBackground = fillLogoBackground;
+                _invertIcon = invertIcon;
             }
 
             public string GetDataUri()
@@ -266,9 +269,9 @@ namespace QRCoder
             {
                 return _iconSizePercent;
             }
-            public bool FillLogoBackground()
+            public bool InvertImage()
             {
-                return _fillLogoBackground;
+                return _invertIcon;
             }
         }
     }
